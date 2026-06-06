@@ -858,35 +858,73 @@ const WorldCreationScreen: React.FC<WorldCreationProps> = ({ onNavigate, onGameS
                     {knowledgeContent ? "💡 Phát hiện tài liệu Tri thức đang nạp, sẵn sàng trích xuất Luật AI gốc." : "💡 Tự động phân tích các trường bối cảnh hiện có để hình thành Luật AI."}
                   </span>
                   
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      store.setGenerating(true, 'aiRulesExtract');
-                      try {
-                        const compiledCtx = state.world.context || "";
-                        const extracted = await worldAiService.extractRulesFromKnowledge(
-                          knowledgeContent || "",
-                          compiledCtx,
-                          aiModel,
-                          settings || undefined
-                        );
-                        if (extracted && extracted.length > 0) {
-                          store.updateConfig('rules', extracted);
-                          toast.success(`Đã tự động đúc rút ${extracted.length} Luật AI tối cao thành công!`);
-                        } else {
-                          toast.error("Không trích xuất được điều luật nào hợp lệ. Thử lại sau!");
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = '.json';
+                        input.onchange = (e) => {
+                          const file = (e.target as HTMLInputElement).files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              try {
+                                const parsed = JSON.parse(event.target?.result as string);
+                                if (Array.isArray(parsed)) {
+                                  store.updateConfig('rules', parsed);
+                                  toast.success(`Đã nạp thành công ${parsed.length} Quy Luật AI từ tệp Preset!`);
+                                } else if (parsed && Array.isArray(parsed.rules)) {
+                                  store.updateConfig('rules', parsed.rules);
+                                  toast.success(`Đã nạp thành công ${parsed.rules.length} Quy Luật AI từ tệp Preset!`);
+                                } else {
+                                  toast.error("Tệp JSON không định dạng đúng. Phải là mảng hoặc có trường 'rules'.");
+                                }
+                              } catch (err) {
+                                toast.error("Lỗi phân tích tệp JSON quy luật.");
+                              }
+                            };
+                            reader.readAsText(file);
+                          }
+                        };
+                        input.click();
+                      }}
+                      className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-black bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/30 hover:bg-purple-500/20 transition-all cursor-pointer shrink-0"
+                    >
+                      <span>📥 Nạp Quy Luật (.json)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        store.setGenerating(true, 'aiRulesExtract');
+                        try {
+                          const compiledCtx = state.world.context || "";
+                          const extracted = await worldAiService.extractRulesFromKnowledge(
+                            knowledgeContent || "",
+                            compiledCtx,
+                            aiModel,
+                            settings || undefined
+                          );
+                          if (extracted && extracted.length > 0) {
+                            store.updateConfig('rules', extracted);
+                            toast.success(`Đã tự động đúc rút ${extracted.length} Luật AI tối cao thành công!`);
+                          } else {
+                            toast.error("Không trích xuất được điều luật nào hợp lệ. Thử lại sau!");
+                          }
+                        } catch (err: any) {
+                          toast.error("Thất bại khi rút luật AI: " + err.message);
+                        } finally {
+                          store.setGenerating(false);
                         }
-                      } catch (err: any) {
-                        toast.error("Thất bại khi rút luật AI: " + err.message);
-                      } finally {
-                        store.setGenerating(false);
-                      }
-                    }}
-                    disabled={state.isGenerating}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white transition-all shadow-md hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 shrink-0 cursor-pointer"
-                  >
-                    <span>{state.isGenerating && state.generatingField === 'aiRulesExtract' ? "Đang trích xuất..." : "✨ Trích xuất Luật AI"}</span>
-                  </button>
+                      }}
+                      disabled={state.isGenerating}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white transition-all shadow-md hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 shrink-0 cursor-pointer"
+                    >
+                      <span>{state.isGenerating && state.generatingField === 'aiRulesExtract' ? "Đang trích xuất..." : "✨ Trích xuất Luật AI"}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1038,6 +1076,83 @@ const WorldCreationScreen: React.FC<WorldCreationProps> = ({ onNavigate, onGameS
             <p className="text-[10px] text-slate-500 dark:text-slate-400 pt-0.5 font-medium">Bản ghi độc lập đồng bộ tự động vào bộ nhớ dài hạn của RPG</p>
           </div>
           <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                input.onchange = (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      try {
+                        const parsed = JSON.parse(event.target?.result as string);
+                        let incoming: any[] = [];
+                        if (Array.isArray(parsed)) {
+                          incoming = parsed;
+                        } else if (parsed && Array.isArray(parsed.entities)) {
+                          incoming = parsed.entities;
+                        } else if (parsed && Array.isArray(parsed.entries)) {
+                          incoming = parsed.entries;
+                        } else {
+                          toast.error("Tệp JSON không chứa mảng thực thể hợp lệ.");
+                          return;
+                        }
+
+                        if (incoming.length === 0) {
+                          toast.error("Không tìm thấy thực thể nào trong tệp.");
+                          return;
+                        }
+
+                        // Map / sanitize records to fit `Entity` format
+                        const mapped = incoming.map((item: any, idx) => {
+                          const id = item.id || `ent_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`;
+                          return {
+                            id,
+                            name: item.name || "Vô danh thực thể",
+                            type: (item.type || "CUSTOM").toUpperCase() as import("../../types").EntityType,
+                            description: item.description || item.background || item.content || "",
+                            age: item.age || "",
+                            gender: item.gender || "",
+                            personality: item.personality || "",
+                            appearance: item.appearance || "",
+                            status: item.status || "ACTIVE",
+                            rarity: item.rarity || undefined
+                          };
+                        });
+
+                        // Avoid name duplicates by filtering current ones
+                        const current = [...(state.entities || [])];
+                        let added = 0;
+                        mapped.forEach(ent => {
+                          const dupIdx = current.findIndex(e => e.name.toLowerCase() === ent.name.toLowerCase());
+                          if (dupIdx !== -1) {
+                            current[dupIdx] = { ...current[dupIdx], ...ent };
+                          } else {
+                            current.push(ent);
+                            added++;
+                          }
+                        });
+
+                        store.updateWorld('entities', current);
+                        // Also sync to store entities
+                        store.setEntities(current);
+                        toast.success(`Đã nạp thành công ${mapped.length} thực thể Bách Khoa (Thêm mới: ${added}, Cập nhật: ${mapped.length - added})`);
+                      } catch (err) {
+                        toast.error("Lỗi phân tích tệp bách khoa toàn thư.");
+                      }
+                    };
+                    reader.readAsText(file);
+                  }
+                };
+                input.click();
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-black bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0"
+            >
+              <span>📥 Nạp Preset (.json)</span>
+            </button>
             <Button 
               variant="primary" 
               onClick={() => { setEditingEntityId(null); setShowEntityForm(true); }} 

@@ -114,20 +114,24 @@ export class StoryBibleEngine {
     }
 
     const aiClient = getAiClient(settings);
-    const prompt = `Analyze the following World Setting and Character Data. Generate 10-15 core encyclopedia entries.
+    const prompt = `Analyze the following World Setting and Character Data. Generate at least 20 to 30 highly comprehensive, deeply detailed core world encyclopedia and lore entries. It is MANDATORY that you generate massive, rich worldbuilding details (no less than 20 distinct high-quality entries with spacious background descriptions).
 Focus on:
-1. "Thế giới có luật gì?" -> world_rule [always]
-2. "Ai quan trọng?" -> character [keyword]
-3. "Xảy ra ở đâu?" -> location [keyword]
-4. "Phe phái nào?" -> faction [keyword]
-5. "Giọng văn thế nào?" -> tone [always]
+1. "Thế giới có luật gì?" -> world_rule or rule [always/hybrid]
+2. "Ai quan trọng?" -> character [keyword/hybrid]
+3. "Xảy ra ở đâu / Địa đồ cổ xưa?" -> location [keyword/hybrid]
+4. "Phe phái / Thế lực chính thống hay tà phái?" -> faction [keyword/hybrid]
+5. "Cổ vật / Tuyệt thế thần binh / Linh đan diệu dược?" -> item [keyword/hybrid]
+6. "Truyền thuyết / Niên biểu lịch sử?" -> event or world [keyword/hybrid]
+7. "Giọng văn / Thế đạo triết học truyền thừa?" -> tone or style [always]
+
+Ensure each generated entry's "content" is extremely detailed, rich in historical context, flavor text, and setting depth (not short or generic).
 
 Return valid JSON list of entries:
 [
   {
     "title": "Entry Title",
     "category": "character|location|item|faction|relationship|world|event|rule|style",
-    "content": "Full description",
+    "content": "Fully detailed comprehensive description with rich background lore to assist the AI Narrator",
     "keywords": ["key1", "key2"],
     "triggerMode": "always|keyword|semantic|hybrid",
     "priority": 80,

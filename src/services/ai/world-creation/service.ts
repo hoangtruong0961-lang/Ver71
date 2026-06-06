@@ -141,7 +141,7 @@ You must include ALL these labels in the "player.customFields" array. Each item 
         6. Include:
            - 1 Main Character (Player): Has a biography, personality, goals, appearance, voice and tone, and narrative role (Choose from: Protagonist, Antagonist, Mentor & Ally, Foil) related to the core idea.
            - World Setting (World): Name, genre, detailed background/history description of each layer, and starting scenario (startingScenario).
-           - 4 Entities (Entities): Include at least 1 NPC, 1 Location, 1 Item, 1 Faction.
+           - At least 15 to 20 Entities (Entities): Generate a comprehensive and massive world encyclopedia of at least 15 to 20 detailed entries. Include multiple key NPCs, sacred locations, divine or cursed weapons/items, global factions/sects, and unique legends directly adapted from the retrieved knowledge text. Each entry must contain rich details and multi-sentence backstories.
            - 3-5 World Rules (Rules): Special rules, taboos, or operating mechanisms of this world.
            - Initial Game Time (initialGameTime): Choose a starting timestamp (Year, Month, Day, Hour, Minute) reasonable for the world context.
         
@@ -804,14 +804,13 @@ Trả về đúng JSON theo cấu trúc trên. Không kèm giải thích.`;
     modelName: string = 'gemini-3.5-flash',
     settings?: AppSettings
   ): Promise<Array<{ title: string; period: string; description: string }>> {
-    // Prefer higher reasoning models if configured for ultimate deep extraction
     const selectedModel = settings?.backgroundAiModel || modelName;
 
     const prompt = `Bạn là một nhà chép sử, thủ thư lưu trữ và học giả biên kịch đồng nhân vĩ đại bậc nhất thế giới.
 Hãy đọc kỹ tệp tri thức nguyên tác dưới đây của tác phẩm "${title}".
 
 BẢN CHỈ THỊ BIÊN NIÊN SỬ KHỔNG LỒ (EXHAUSTIVE NOVEL CHROMATIC TIMELINE DIRECTIVE):
-Sự hời hợt, biếng nhác phác họa qua loa vài mốc sơ sài của AI thông thường là điều CẤM KỴ TUYỆT ĐỐI. Nó sẽ hủy hoại dòng thời gian của trò chơi.
+Sự hời hợt, biếng nhác phác họa qua loa vài mốc sơ sài của AI thông thường là điều CẤM Kᦴ TUYỆT ĐỐI. Nó sẽ hủy hoại dòng thời gian của trò chơi.
 Nhiệm vụ của bạn là đi sâu quét toàn bộ tệp văn bản từ dòng đầu tiên đến dòng cuối cùng của tài liệu để trích xuất một Biên niên sử vạn dặm đầy đủ, đồ sộ và cực kỳ hoàn chỉnh cấu trúc truyện, gồm tối thiểu từ 25 đến 40 mốc sự kiện/timeline tuyến tính liên tiếp.
 Các mốc này không được bỏ trống bất kỳ đại chương (arcs), bước ngoặt, trận chiến oanh liệt hay bước phát triển cốt lõi nào của nguyên tác tác phẩm.
 
@@ -866,34 +865,46 @@ Bắt buộc trả về một MẢNG JSON các đối tượng [{ "title": "..."
     knowledgeText: string,
     worldContext: string,
     modelName: string = 'gemini-3.5-flash',
-    settings?: AppSettings
+    settings?: AppSettings,
+    rulesCount: number = 100,
+    wordsPerRule: number = 100
   ): Promise<string[]> {
-    const prompt = `Bạn là một chuyên gia thiết kế cơ chế game và luật pháp thế giới giả lập tối cao (AI Rules Engine Architect).
-Nhiệm vụ của bạn là phân tích sâu cấu trúc lý thuyết của tài liệu tri thức (Lore/Knowledge) và bối cảnh thế giới hiện tại dưới đây, sau đó xây dựng từ 8 đến 15 LUẬT AI TỐI CAO (Advanced AI Rules - Pháp luật bắt buộc của trò chơi).
+    const prompt = `Bạn là một Thiên Đạo Quy Tắc Thủ Hộ Đại Sư và Nhà Thiết Kế Thế Giới Thần Thoại Vĩ Đại (Celestial Universe & Supreme Lore Rules Architect).
+Nhiệm vụ tối thượng của bạn là phân tích sâu sắc tài liệu tri thức tuyển tập (Lore/Knowledge) và bối cảnh thế giới hiện tại được cung cấp dưới đây, từ đó xây dựng và đúc rút hệ thống luật lệ vũ trụ gồm chính xác ${rulesCount} LUẬT THẾ GIỚI CỰC KỲ CHI TIẾT, BÁM SÁT CHẶT CHẼ TRUYỆN GỐC/LOREBOOK (Deep Setting & Metaphysical World Rules).
 
-MỤC TIÊU CỦA LUẬT AI:
-- Ràng buộc trực hệ chỉ thị cưỡng chế vào nền tảng tư duy bối cảnh của LLM. Tránh sự lấp liếm hời hợt của mô hình AI khi kể chuyện, ép AI phải tuyệt đối tôn trọng các chế tài vận hành của thế giới đồng nhân.
-- Ngăn chặn triệt để tình trạng AI tự ý tạo ra các cheat ẩn, ma thuật vô hạn, phục hồi tức thời không trả giá, bỏ qua các giới hạn cấp bậc/cảnh giới, hoặc tự tiện bỏ qua chi phí tài nguyên (Linh khí, Ma lực, Mana, Pháp lực, Đan dược, vũ khí, thể lực).
-- Bản chất pháp lý cao nhất: Nếu tài nguyên bị cạn kiệt, nhân vật PHẢI chịu thất bại logic, bị phản phệ độc hại, khốn quẫn mỏi mệt, suy sụp đan điền hoặc gãy đổ bí bảo chứ không được "sáng tạo ma thuật cheat ảo".
-- Bảo vệ triệt để tính chân thực và tính thử thách tàn khốc của thế giới nguyên tác.
+⚠️ PHẢN BIỆN LÝ DO LUẬT BỊ CẤM HOẶC BỊ TỪ CHỐI:
+Các luật định hướng hành vi cho AI (ví dụ: "AI không được bẻ cong cốt truyện", "AI phải miêu tả sinh động", "AI không được dùng từ hiện đại") bị NGHIÊM CẤM tuyệt đối.
+Người dùng cần: Các quy luật thực tế vận hành thế giới này. Làm sao để AI đóng vai Narrator bám sát thế giới giả lập một cách chân thực nhất. 
+Các quy luật này quy định: dòng chảy linh lực/ma pháp, cấm kỵ tông môn địa giới, thời gian chu kỳ kích động của ma vương, ranh giới sinh lý, cách chuyển hóa năng lượng huyền ảo, giới hạn thăng tu luyện, các phản phệ kinh hồn khi phá vỡ pháp lý...
 
-BỐI CẢNH THẾ GIỚI HIỆN TẠI:
+🔥 YÊU CẦU ĐỘT PHÁ LORE TRUYỆN GỐC (ABSOLUTE LORE ADHERENCE):
+1. Bạn phải dựa HOÀN TOÀN vào văn bản tri thức nguyên tác (SOURCE LORE KNOWLEDGE) để rút ra các sự thật thế giới. Hãy dùng chính xác các danh từ riêng: tên tông môn (như Vân Lam Tông, Hồn Điện...), danh xưng cảnh giới (như Đấu Khả, Đấu Vương, Pháp Sĩ...), tên dị vật/bảo khí (như Cổ Đế Đà Xá Ngọc, Thanh Liên Địa Tâm Hỏa...), địa danh (như Ma Thú Sơn Mạch, Hoang Cổ Cấm Địa...).
+2. Phát huy tối đa thần khí bối cảnh! Nếu là thế giới tiên hiệp/kiếm hiệp, hãy dùng ngôn ngữ tu chân cổ phong. Nếu là ma pháp/fantasy Tây phương, hãy dùng ngôn luật ma mị sử thi. Nếu là khoa học viễn tưởng/cyberpunk, hãy dùng ngôn ngữ thiết giáp cơ học lượng tử bối cảnh.
+3. Mỗi quy luật phải dài TỐI THIỂU ${wordsPerRule} từ (chữ) trở lên. Tránh viết những câu sáo rỗng ngắn ngủn dưới ${wordsPerRule} từ. Mỗi luật phải chứa đựng giải nghĩa tường tận: nguyên nhân từ lore gốc, bản chất vật lý/ma pháp, ranh giới định mức cụ thể, phản phệ hay hệ quả cực đoan xảy ra trong thế giới thực tế.
+
+CÁC NGUYÊN TẮC THIẾT KẾ PHÁP TẮC VŨ TRỤ:
+- Ghi rõ số thứ tự liên tục từ Quy luật #1 đến Quy luật #${rulesCount}.
+- Phân bổ đều và bao phủ một cách mạch lạc qua các khía cạnh chủ chốt của thế thế giới:
+  + Bản chất nguyên tố phép thuật, linh khí đặc trưng, linh mạch phân phong.
+  + Trật tự và giới hạn cảnh giới tu vi, quy chuẩn thăng cấp dã sử.
+  + Biên giới lãnh thổ địa võng, quy củ giao kết của các hoàng tộc thế lực cổ đại.
+  + Bí thuật r forging, rủi ro nổ mạch năng lượng, sự nguyền rủa của vũ khí tà giáo.
+  + Đồng hồ sinh học, hệ quả dã lực thiên tai chu kỳ biến đổi sinh thái.
+  + Nghiệp báo nhân quả hành vi thế giới, luật luân hồi hồn phách bản địa.
+
+BỐI CẢNH THẾ GIỚI HIỆN TẠI (WORLD CONTEXT):
 """
 ${worldContext}
 """
 
-TÀI LIỆU TRI THỨC BỔ SUNG (NẾU CÓ):
+TÀI LIỆU TRI THỨC BỔ SUNG (SOURCE LORE KNOWLEDGE):
 """
 ${knowledgeText ? knowledgeText.slice(0, 500000) : "Không có tài liệu bổ sung."}
 """
 
-YÊU CẦU ĐÚC KẾT CHI TIẾT (MANDATORY DETAIL):
-- Tạo từ 8 đến 15 quy tắc ràng buộc rõ ràng, đanh thép bằng tiếng Việt dưới dạng chỉ thị nghiêm khắc bắt AI tuân thủ.
-- Mỗi quy tắc được viết thành 2-3 câu dài, chặt chẽ, đầy đủ cấu trúc pháp chế và chế tài (Ví dụ: "Hao tổn tài nguyên linh khí chi tiết: Khi nhân vật thi triển tuyệt kỹ, pháp lực hoặc linh khí PHẢI bị sụt giảm tương ứng. Nếu LSR chỉ ra lượng linh khí chạm đáy, tuyệt đối cấm thi triển ma pháp thành công. AI bắt buộc phải mô tả Arthur gồng mình bất lực, kinh mạch đau nhói nứt rách {RẮC!} và chịu thất bại logic hoặc bị kẻ thù phản công tàn nhẫn.").
-- Các luật lệ phải liên quan mật thiết đến hệ thống sức mạnh, võ công, tuyệt kỹ, quy luật địa lý, cấm địa hỏa ngục hay quy tắc xã hội được nhắc đến trực tiếp trong tệp tri thức nguyên tác.
-
-YÊU CẦU TRẢ VỀ:
-Trả về kết quả dưới dạng một MẢNG JSON các chuỗi ký tự (Array of strings). Không kèm giải thích ngoài lề.`;
+YÊU CẦU ĐỊNH DẠNG ĐẦU RA SẤM SÉT (MANDATORY FORMAT):
+Trả về kết quả dưới dạng một MẢNG JSON gồm chính xác ${rulesCount} chuỗi ký tự (Array of strings). Mỗi chuỗi đại diện cho một quy luật hoàn chỉnh. Mỗi chuỗi phải được ghi rõ số thứ tự và tên quy luật ở đầu, ví dụ: "Quy luật #1: [Tên Quy Luật] Mô tả chi tiết...".
+Nghiêm cấm viết câu dẫn hay kết luận, chỉ trả về đúng mảng JSON hợp lệ chứa chính xác ${rulesCount} chuỗi quy luật để hệ thống parse chuẩn xác.`;
 
     const aiClient = getAiClient(settings);
     const response = await aiClient.models.generateContent({
@@ -903,16 +914,92 @@ Trả về kết quả dưới dạng một MẢNG JSON các chuỗi ký tự (A
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.ARRAY,
-          description: "Mảng danh sách các quy tắc Luật AI tối cao",
+          description: `Mảng danh sách các quy tắc Luật AI tối cao bám sát bối cảnh lore chi tiết`,
           items: { type: Type.STRING }
         },
-        temperature: 0.3
+        temperature: 0.25
       }
     });
 
     if (response.text) {
       const parsed = extractJson<string[]>(response.text);
-      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+    return [];
+  },
+
+  async extractEncyclopediaFromKnowledge(
+    knowledgeText: string,
+    title: string,
+    modelName: string = "gemini-3.5-flash",
+    settings?: AppSettings
+  ): Promise<any[]> {
+    const selectedModel = settings?.backgroundAiModel || modelName;
+
+    const prompt = `Bạn là một Nhà Sử Học và Thiết Kế Thế Giới Thần Thoại Tối Cao (Cosmic Archivist & Worldcrafting Sage).
+Hãy đọc kỹ tệp tri thức nguyên tác dưới đây từ tác phẩm "${title}".
+
+Nhiệm vụ tối quan trọng của bạn là phục dựng và thiết chế một lượng Bách Khoa Toàn Thư (Encyclopedia/Lorebook Database) cực kỳ đồ sộ, dạt dào chi tiết và bám sát lore, gồm chính xác TỐI THIỂU 20 thực thể (entries) rời rạc khác nhau. 
+Sự qua loa, ngắn gọn hay sơ sài là sụp đổ bối cảnh! Mỗi mục phải chứa một thiên dã sử/mô tả đồ sộ, chuẩn lore bối cảnh và giàu tính văn chương.
+
+Hãy phân phối đúng tối thiểu 20 thực thể này chuẩn chỉ theo các danh mục EntityType sau:
+1. NPC (Nhân vật kỳ tài, cổ đế, thủ lĩnh, hộ pháp, nhân vật then chốt) - ít nhất 5 mục.
+2. LOCATION (Cấm phong địa giới, đại điện, cổ thành, linh sơn, bí cảnh) - ít nhất 5 mục.
+3. FACTION (Tông môn phái hội, vương triều, ma tộc cổ tộc, tổ chức bí ẩn) - ít nhất 4 mục.
+4. ITEM (Thánh khí, cổ thư, thần đan dị dược, thiên địa dị vật) - ít nhất 4 mục.
+5. CUSTOM (Luật nhân quả độc quyền thế giới, thiên tai chu kỳ, pháp tắc vũ trụ) - ít nhất 2 mục.
+
+CẤU TRÚC CHI TIẾT CỦA MỖI MỤC (Mỗi chuỗi mô tả/description phải dài ít nhất 8-12 câu văn, cực kỳ giàu thông tin, không dưới 120 từ):
+- name: Tên thực thể hay, lột tả thần khí bối cảnh (Ví dụ: "Hỗn Nguyên Động Phủ", "Hỗn Độn Thần Đan", "Cổ Linh Lãnh Hỏa").
+- type: Bắt buộc chọn đúng một trong: "NPC", "LOCATION", "FACTION", "ITEM", "CUSTOM".
+- description: Đại mô tả cực kỳ sâu sắc, khảo cứu chi tiết về:
+  + Nguồn gốc lịch sử, thần tích kiến tạo, truyền thuyết truyền lại muôn kiếp.
+  + Hình dạng giác quan, bộc lộ linh uy chấn nhiếp, cấu trúc vật lý hay bản chất sinh thể.
+  + Ảnh hưởng sâu xa đến sự cân bằng bối cảnh thế giới hiện tại, vai trò trong truyện.
+  + Các điều ước, cơ chế hoạt lực, cảnh giới ranh giới quy chuẩn đi kèm thực thể này.
+- personality: (Chỉ dành cho NPC) Nồng độ tính cách, mâu thuẫn hành vi, độ thâm trầm của nhân vật bám sát lore.
+- background: (Chỉ dành cho NPC hoặc FACTION) Bản tiểu sử vạn dặm đầy ắp thăng trầm lịch sử dã sử.
+- rarity: (Chỉ dành cho ITEM) Độ hiếm cổ cổ khí ("Thường", "Hiếm", "Sử thi", "Truyền thuyết").
+- customType: (Chỉ dành cho CUSTOM) Loại luật pháp hay dị kỳ bối cảnh.
+
+VĂN BẢN TRI THỨC LORE NGUYÊN TÁC (QUÉT TOÀN DIỆN):
+"""
+${knowledgeText.slice(0, 700000)}
+"""
+
+YÊU CẦU ĐẦU RA SẤM SÉT (MANDATORY OUTPUT FORMAT):
+Bắt buộc trả về một MẢNG JSON gồm chính xác TỐI THIỂU 20 đối tượng. Không chứa bất kỳ lời mở đầu, kết luận hay giải thích ngoài khối JSON.`;
+
+    const aiClient = getAiClient(settings);
+    const response = await aiClient.models.generateContent({
+      model: selectedModel,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          description: "Mảng chứa tối thiểu 20 thực thể bách khoa toàn thư đậm bối cảnh, sâu lore thế giới",
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              name: { type: Type.STRING },
+              type: { type: Type.STRING },
+              description: { type: Type.STRING },
+              personality: { type: Type.STRING },
+              background: { type: Type.STRING },
+              rarity: { type: Type.STRING },
+              customType: { type: Type.STRING }
+            },
+            required: ["name", "type", "description"]
+          }
+        },
+        temperature: 0.25
+      }
+    });
+
+    if (response.text) {
+      const parsed = extractJson<any[]>(response.text);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
     return [];
   }
