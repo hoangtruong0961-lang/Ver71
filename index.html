@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#020617" />
+    <meta name="description" content="Chơi game nhập vai với AI" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="ARK V5" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/pwa-512x512.png" />
+    <title>Ark v2 SillyTavern</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Roboto:wght@300;400;700&family=Open+Sans:wght@300;400;600;700&family=Montserrat:wght@300;400;600;700&family=Oswald:wght@300;400;700&family=Playfair+Display:wght@400;700&family=Lora:wght@400;700&family=Noto+Sans+Vietnamese:wght@300;400;700&family=Be+Vietnam+Pro:wght@300;400;600;700&family=JetBrains+Mono:wght@300;400;700&family=IBM+Plex+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['var(--font-system)', 'Lora', 'serif'],
+              serif: ['Playfair Display', 'serif'],
+              mono: ['IBM Plex Mono', 'JetBrains Mono', 'monospace'],
+            },
+            colors: {
+              mystic: {
+                950: '#020617', // Slate 950 - Deepest
+                900: '#030712', // Darker than Slate 900
+                800: '#0f172a', // Slate 900
+                accent: '#38bdf8', // Sky 400
+                glow: 'rgba(56, 189, 248, 0.5)'
+              }
+            },
+            animation: {
+              'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      :root {
+        --font-system: 'Lora', serif;
+        --font-size-base: 16px;
+        --neu-bg: #e6ebf4;
+        --neu-shadow-dark: #cbd2df;
+        --neu-shadow-light: #ffffff;
+        --neu-flat-bg: linear-gradient(135deg, #f0f3f9, #dbe2ef);
+        --neu-convex-bg: linear-gradient(135deg, #f5f8fc, #d6dfed);
+        --neu-concave-bg: linear-gradient(135deg, #d6dfed, #f5f8fc);
+        --neu-inset-bg: linear-gradient(135deg, #d6dfed, #ebf0f8);
+        --neu-border: rgba(255, 255, 255, 0.5);
+        --theme-text: #1e293b;
+        --theme-accent: #0284c7;
+        --theme-muted: #64748b;
+      }
+      .dark {
+        --neu-bg: #0b1329;
+        --neu-shadow-dark: #030610;
+        --neu-shadow-light: #142042;
+        --neu-flat-bg: linear-gradient(135deg, #0e182e, #04060c);
+        --neu-convex-bg: linear-gradient(135deg, #101c34, #03050a);
+        --neu-concave-bg: linear-gradient(135deg, #03050a, #101c34);
+        --neu-inset-bg: linear-gradient(135deg, #03050a, #0e182e);
+        --neu-border: rgba(255, 255, 255, 0.03);
+        --theme-text: #e2e8f0;
+        --theme-accent: #38bdf8;
+        --theme-muted: #94a3b8;
+      }
+      html, body, #root {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        font-family: var(--font-system), sans-serif;
+        font-size: var(--font-size-base);
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+      @media (max-width: 767px) {
+        html {
+          font-size: var(--font-size-base) !important;
+          -webkit-text-size-adjust: 100%;
+          text-size-adjust: 100%;
+        }
+      }
+      body {
+        font-family: var(--font-system), sans-serif;
+        font-size: 1rem;
+        overflow: hidden; 
+      }
+      * {
+        font-family: inherit;
+      }
+      
+      /* --- Neomorphism Utility Styles --- */
+      
+      /* Neu Flat / Extruded outwardly (Embossed) */
+      .neu-flat {
+        background: var(--neu-flat-bg);
+        box-shadow: 
+          6px 6px 14px var(--neu-shadow-dark), 
+          -6px -6px 14px var(--neu-shadow-light);
+        border: 1px solid var(--neu-border);
+      }
+      
+      /* Neu Convex - Slightly domed */
+      .neu-convex {
+        background: var(--neu-convex-bg);
+        box-shadow: 
+          6px 6px 14px var(--neu-shadow-dark), 
+          -6px -6px 14px var(--neu-shadow-light);
+        border: 1px solid var(--neu-border);
+      }
+
+      /* Neu Concave - Slightly hollowed */
+      .neu-concave {
+        background: var(--neu-concave-bg);
+        box-shadow: 
+          inset 5px 5px 12px var(--neu-shadow-dark), 
+          inset -5px -5px 12px var(--neu-shadow-light);
+        border: 1px solid var(--neu-border);
+      }
+
+      /* Neu Inset / Sunken inwardly */
+      .neu-inset {
+        background: var(--neu-inset-bg);
+        box-shadow: 
+          inset 6px 6px 12px var(--neu-shadow-dark), 
+          inset -6px -6px 12px var(--neu-shadow-light);
+        border: 1px solid var(--neu-border);
+      }
+      
+      /* Small Neu Flat - Good for quick buttons, badges, small items */
+      .neu-sm-flat {
+        background: var(--neu-flat-bg);
+        box-shadow: 
+          3px 3px 7px var(--neu-shadow-dark), 
+          -3px -3px 7px var(--neu-shadow-light);
+        border: 1px solid var(--neu-border);
+      }
+      .neu-sm-flat:hover {
+        filter: brightness(1.03);
+      }
+      .neu-sm-flat:active, .neu-sm-flat.active {
+        background: var(--neu-inset-bg);
+        box-shadow: 
+          inset 2px 2px 5px var(--neu-shadow-dark), 
+          inset -2px -2px 5px var(--neu-shadow-light);
+      }
+
+      /* Small Neu Inset - Good for inputs, small indicators */
+      .neu-sm-inset {
+        background: var(--neu-inset-bg);
+        box-shadow: 
+          inset 3px 3px 6px var(--neu-shadow-dark), 
+          inset -3px -3px 6px var(--neu-shadow-light);
+        border: 1px solid var(--neu-border);
+      }
+
+      /* Neu Interactive Button */
+      .neu-btn {
+        background: var(--neu-flat-bg);
+        box-shadow: 
+          4px 4px 10px var(--neu-shadow-dark), 
+          -4px -4px 10px var(--neu-shadow-light);
+        border: 1px solid var(--neu-border);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .neu-btn:hover {
+        filter: brightness(1.03);
+        box-shadow: 
+          5px 5px 12px var(--neu-shadow-dark), 
+          -5px -5px 12px var(--neu-shadow-light);
+        transform: translateY(-1px);
+      }
+      .neu-btn:active, .neu-btn.active {
+        background: var(--neu-inset-bg);
+        box-shadow: 
+          inset 4px 4px 8px var(--neu-shadow-dark), 
+          inset -4px -4px 8px var(--neu-shadow-light);
+        transform: translateY(1px);
+      }
+
+
+      /* Custom scrollbar for future text logs */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1e293b;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #475569;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
